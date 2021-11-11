@@ -82,6 +82,7 @@ func SetupBatcher(
 	dataSigner func([]byte) ([]byte, error),
 	config *configuration.Config,
 	walletConfig *configuration.Wallet,
+	feedBroadcaster *broadcaster.Broadcaster,
 ) (batcher.TransactionBatcher, error) {
 	switch batcherMode := batcherMode.(type) {
 	case ForwarderBatcherMode:
@@ -132,7 +133,6 @@ func SetupBatcher(
 		if err != nil {
 			return nil, err
 		}
-		feedBroadcaster := broadcaster.NewBroadcaster(config.Feed.Output)
 		seqBatcher, err := batcher.NewSequencerBatcher(
 			ctx,
 			batcherMode.Core,

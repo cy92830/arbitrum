@@ -302,8 +302,8 @@ func startup() error {
 		Core:        mon.Core,
 		InboxReader: inboxReader,
 	}
-
-	db, txDBErrChan, err := txdb.New(ctx, mon.Core, mon.Storage.GetNodeStore(), &config.Node)
+	feedBroadcaster := broadcaster.NewBroadcaster(config.Feed.Output)
+	db, txDBErrChan, err := txdb.New(ctx, mon.Core, mon.Storage.GetNodeStore(), &config.Node, feedBroadcaster)
 	if err != nil {
 		return errors.Wrap(err, "error opening txdb")
 	}
@@ -324,6 +324,7 @@ func startup() error {
 		signer,
 		&config,
 		&config.Wallet,
+		feedBroadcaster,
 	)
 	if err != nil {
 		return err

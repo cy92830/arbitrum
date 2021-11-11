@@ -36,6 +36,7 @@ import (
 	"github.com/offchainlabs/arbitrum/packages/arb-evm/evm"
 	"github.com/offchainlabs/arbitrum/packages/arb-rpc-node/blockcache"
 	"github.com/offchainlabs/arbitrum/packages/arb-rpc-node/snapshot"
+	"github.com/offchainlabs/arbitrum/packages/arb-util/broadcaster"
 	"github.com/offchainlabs/arbitrum/packages/arb-util/common"
 	"github.com/offchainlabs/arbitrum/packages/arb-util/configuration"
 	"github.com/offchainlabs/arbitrum/packages/arb-util/core"
@@ -51,6 +52,7 @@ type TxDB struct {
 	allowSlowLookup bool
 	as              machine.NodeStore
 	logReader       *core.LogReader
+	feedBroadcaster *broadcaster.Broadcaster
 
 	newTxsFeed      event.Feed
 	rmLogsFeed      event.Feed
@@ -71,6 +73,7 @@ func New(
 	arbCore core.ArbCore,
 	as machine.NodeStore,
 	nodeConfig *configuration.Node,
+	feedBroadcaster *broadcaster.Broadcaster,
 ) (*TxDB, <-chan error, error) {
 	var snapshotLRUCache *lru.Cache
 	var blockInfoLRUCache *lru.Cache
@@ -95,6 +98,7 @@ func New(
 	db := &TxDB{
 		Lookup:             arbCore,
 		as:                 as,
+		feedBroadcaster:    feedBroadcaster,
 		snapshotLRUCache:   snapshotLRUCache,
 		blockInfoLRUCache:  blockInfoLRUCache,
 		snapshotTimedCache: snapshotTimedCache,

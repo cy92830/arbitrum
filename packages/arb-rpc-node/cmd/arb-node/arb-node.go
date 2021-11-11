@@ -244,6 +244,7 @@ func startup() error {
 
 	var dataSigner func([]byte) ([]byte, error)
 	var batcherMode rpc.BatcherMode
+	var feedBroadcaster *broadcaster.Broadcaster
 	if config.Node.Type == "forwarder" {
 		logger.Info().Str("forwardTxURL", config.Node.Forwarder.Target).Msg("Arbitrum node starting in forwarder mode")
 		batcherMode = rpc.ForwarderBatcherMode{Config: config.Node.Forwarder}
@@ -271,6 +272,7 @@ func startup() error {
 				Core:        mon.Core,
 				InboxReader: inboxReader,
 			}
+			feedBroadcaster = broadcaster.NewBroadcaster(config.Feed.Output)
 		} else {
 			inboxAddress := common.HexToAddress(config.Node.Aggregator.InboxAddress)
 			if config.Node.Aggregator.Stateful {
@@ -284,7 +286,7 @@ func startup() error {
 	nodeStore := mon.Storage.GetNodeStore()
 	metricsConfig.RegisterNodeStoreMetrics(nodeStore)
 	metricsConfig.RegisterArbCoreMetrics(mon.Core)
-	db, txDBErrChan, err := txdb.New(ctx, mon.Core, nodeStore, &config.Node)
+	db, txDBErrChan, err := txdb.New(ctx, mon.Core, nodeStore, &config.Node, feedBroadcaster)
 	if err != nil {
 		return errors.Wrap(err, "error opening txdb")
 	}
@@ -308,6 +310,7 @@ func startup() error {
 			dataSigner,
 			config,
 			walletConfig,
+			feedBroadcaster,
 		)
 		lockoutConf := config.Node.Sequencer.Lockout
 		if err == nil {

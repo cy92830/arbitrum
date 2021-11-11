@@ -65,7 +65,7 @@ func NewDevNode(ctx context.Context, dir string, arbosPath string, chainId *big.
 		return nil, nil, nil, nil, err
 	}
 
-	db, errChan, err := txdb.New(ctx, mon.Core, mon.Storage.GetNodeStore(), nodeConfig)
+	db, errChan, err := txdb.New(ctx, mon.Core, mon.Storage.GetNodeStore(), nodeConfig, nil)
 	if err != nil {
 		mon.Close()
 		return nil, nil, nil, nil, errors.Wrap(err, "error opening txdb")
